@@ -1,9 +1,17 @@
 import os
-from sys import exit as exx
 import time
 import uuid
 import re
+import json
+import re  # nosec
+import ipywidgets as widgets  # pylint: disable=import-error
+from IPython.display import HTML, clear_output, display  # pylint: disable=import-error
 from subprocess import Popen,PIPE
+from google.colab import files  # pylint: disable=import-error
+from glob import glob
+from sys import exit as exx
+from zipfile import ZipFile #
+from urllib.request import urlretrieve #
 
 HOME = os.path.expanduser("~")
 CWD = os.getcwd()
@@ -219,6 +227,7 @@ class ngrok:
             continue
         return dati
 
+
 def checkAvailable(path_="", userPath=False):
     from os import path as _p
 
@@ -231,17 +240,18 @@ def checkAvailable(path_="", userPath=False):
             else _p.exists(f"/usr/local/sessionSettings/{path_}")
         )
 
-def accessSettingFile(file="", setting={}, v=True):
+
+def accessSettingFile(file="", setting={}):
     from json import load, dump
 
     if not isinstance(setting, dict):
-        if v:print("Could only accept Dictionary object!")
+        print("Only accept Dictionary object.")
         exx()
     fullPath = f"/usr/local/sessionSettings/{file}"
     try:
         if not len(setting):
             if not checkAvailable(fullPath):
-                if v:print(f"File unavailable: {fullPath}.")
+                print(f"File unavailable: {fullPath}.")
                 exx()
             with open(fullPath) as jsonObj:
                 return load(jsonObj)
@@ -249,7 +259,7 @@ def accessSettingFile(file="", setting={}, v=True):
             with open(fullPath, "w+") as outfile:
                 dump(setting, outfile)
     except:
-        if v:print(f"Error accessing the file: {fullPath}.")
+        print(f"Error accessing the file: {fullPath}.")
 
 
 def displayUrl(data, btc='b', pNamU='Public URL: ', EcUrl=None, ExUrl=None, cls=True):
@@ -304,27 +314,24 @@ def findProcess(process, command="", isPid=False):
             except:
                 continue
 
+
 def installNgrok():
     if checkAvailable("/usr/local/bin/ngrok"):
         return
     else:
-        import os
-        from zipfile import ZipFile
-        from urllib.request import urlretrieve
+        runSh(
+            "wget -qq -c -nc https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
+        )
+        runSh("unzip -qq -n ngrok-stable-linux-amd64.zip")
+        runSh("mv ngrok /usr/local/bin/ngrok")
+        runSh("rm -f /content/ngrok-stable-linux-amd64.zip")
 
-        ngURL = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
-        urlretrieve(ngURL, 'ngrok-amd64.zip')
-        with ZipFile('ngrok-amd64.zip', 'r') as zip_ref:
-            zip_ref.extractall('/usr/local/bin/')
-        os.chmod('/usr/local/bin/ngrok', 0o755)
-        os.unlink('ngrok-amd64.zip')
 
 def installAutoSSH():
     if checkAvailable("/usr/bin/autossh"):
         return
     else:
         runSh("apt-get install autossh -qq -y")
-
 
 
 def runSh(args, *, output=False, shell=False, cd=None):
@@ -357,6 +364,7 @@ def runSh(args, *, output=False, shell=False, cd=None):
             )
         return subprocess.run(args, shell=True, cwd=cd).returncode
 
+
 def loadingAn(name="cal"):
       from IPython.display import HTML
 
@@ -364,6 +372,7 @@ def loadingAn(name="cal"):
           return display(HTML('<style>.lds-ring {   display: inline-block;   position: relative;   width: 34px;   height: 34px; } .lds-ring div {   box-sizing: border-box;   display: block;   position: absolute;   width: 34px;   height: 34px;   margin: 4px;   border: 5px solid #cef;   border-radius: 50%;   animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;   border-color: #cef transparent transparent transparent; } .lds-ring div:nth-child(1) {   animation-delay: -0.45s; } .lds-ring div:nth-child(2) {   animation-delay: -0.3s; } .lds-ring div:nth-child(3) {   animation-delay: -0.15s; } @keyframes lds-ring {   0% {     transform: rotate(0deg);   }   100% {     transform: rotate(360deg);   } }</style><div class="lds-ring"><div></div><div></div><div></div><div></div></div>'))
       elif name == "lds":
           return display(HTML('''<style>.lds-hourglass {  display: inline-block;  position: relative;  width: 34px;  height: 34px;}.lds-hourglass:after {  content: " ";  display: block;  border-radius: 50%;  width: 34px;  height: 34px;  margin: 0px;  box-sizing: border-box;  border: 20px solid #dfc;  border-color: #dfc transparent #dfc transparent;  animation: lds-hourglass 1.2s infinite;}@keyframes lds-hourglass {  0% {    transform: rotate(0);    animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);  }  50% {    transform: rotate(900deg);    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);  }  100% {    transform: rotate(1800deg);  }}</style><div class="lds-hourglass"></div>'''))
+
 
 def textAn(TEXT, ty='d'):
       from IPython.display import HTML
@@ -373,6 +382,7 @@ def textAn(TEXT, ty='d'):
       elif ty == 'twg':
             textcover = str(len(TEXT)*0.55)
             return display(HTML('''<style>@import url(https://fonts.googleapis.com/css?family=Anonymous+Pro);.line-1{font-family: 'Anonymous Pro', monospace;    position: relative;   border-right: 1px solid;    font-size: 15px;   white-space: nowrap;    overflow: hidden;    }.anim-typewriter{  animation: typewriter 0.4s steps(44) 0.2s 1 normal both,             blinkTextCursor 600ms steps(44) infinite normal;}@keyframes typewriter{  from{width: 0;}  to{width: '''+textcover+'''em;}}@keyframes blinkTextCursor{  from{border-right:2px;}  to{border-right-color: transparent;}}</style><div class="line-1 anim-typewriter">'''+TEXT+'''</div>'''))
+
 
 def updateCheck(self, Version):
     class UpdateChecker(object):
@@ -416,6 +426,7 @@ def updateCheck(self, Version):
         return True
     else:
         print("Script Update Checker: Your script is up to date.")
+
 
 class LocalhostRun:
   def __init__(self,port,id=None,interval=30,retries=30):
@@ -513,3 +524,360 @@ class PortForward:
 class PortForward_wrapper(PortForward):
   def __init__(self,SERVICE,TOKEN,USE_FREE_TOKEN,connections,region,config):
     super(self.__class__,self).__init__(connections,region,SERVICE,TOKEN,USE_FREE_TOKEN,config)
+
+# ====================================================================================================
+
+def createButton(name, *, func=None, style="", icon="check"):
+    import ipywidgets as widgets  # pylint: disable=import-error
+
+    button = widgets.Button(
+        description=name, button_style=style, icon=icon, disabled=not bool(func)
+    )
+    button.style.font_weight = "900"
+    button.on_click(func)
+    output = widgets.Output()
+    display(button, output)
+
+
+def generateRandomStr():
+    from uuid import uuid4
+
+    return str(uuid4()).split("-")[0]
+
+
+def memGiB():
+    from os import sysconf as _sc  # pylint: disable=no-name-in-module
+
+    return _sc("SC_PAGE_SIZE") * _sc("SC_PHYS_PAGES") / (1024.0 ** 3)
+
+
+def installJDownloader():
+    if checkAvailable("/root/.JDownloader/JDownloader.jar"):
+        return
+    else:
+        runSh("mkdir -p -m 666 /root/.JDownloader/libs")
+        runSh("apt-get install openjdk-8-jre-headless -qq -y")
+        runSh(
+            "wget -q http://installer.jdownloader.org/JDownloader.jar -O /root/.JDownloader/JDownloader.jar"
+        )
+        runSh("java -jar /root/.JDownloader/JDownloader.jar -norestart -h")
+        runSh(
+            "wget -q https://biplobsd.github.io/RLabClone/res/jdownloader/sevenzipjbinding1509.jar -O /root/.JDownloader/libs/sevenzipjbinding1509.jar"
+        )
+        runSh(
+            "wget -q https://biplobsd.github.io/RLabClone/res/jdownloader/sevenzipjbinding1509Linux.jar -O /root/.JDownloader/libs/sevenzipjbinding1509Linux.jar"
+        )
+
+
+def installMkvTools():
+    if checkAvailable("/etc/apt/sources.list.d/mkvtoolnix.download.list"):
+        return
+    with open("/etc/apt/sources.list.d/mkvtoolnix.download.list", "w+") as outFile:
+        outFile.write("deb https://mkvtoolnix.download/ubuntu/ bionic main")
+    runSh(
+        "wget -q -O - https://mkvtoolnix.download/gpg-pub-moritzbunkus.txt | sudo apt-key add - && sudo apt-get install mkvtoolnix mkvtoolnix-gui",
+        shell=True,  # nosec
+    )
+    if not checkAvailable("/usr/bin/mediainfo"):
+        runSh("apt-get install mediainfo")
+
+
+def installRclone():
+    if not checkAvailable("/usr/bin/rclone"):
+        runSh(
+            "curl -s https://rclone.org/install.sh | sudo bash",
+            shell=True,  # nosec
+        )
+
+
+def checkServer(hostname):
+    # nosec
+    return True if runSh(f"ping -c 1 {hostname}", shell=True) == 0 else False
+
+
+def configTimezone(auto=True):
+    if checkAvailable("timezone.txt", userPath=True):
+        return
+    if not auto:
+        runSh("sudo dpkg-reconfigure tzdata")
+    else:
+        runSh("sudo ln -fs /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime")
+        runSh("sudo dpkg-reconfigure -f noninteractive tzdata")
+    data = {"timezone": "Asia/Ho_Chi_Minh"}
+    accessSettingFile("timezone.txt", data)
+
+
+def uploadRcloneConfig(localUpload=False):
+    if not localUpload and checkAvailable("rclone.conf", userPath=True):
+        return
+    elif not localUpload:
+        runSh(
+            "wget -qq https://biplobsd.github.io/RLabClone/res/rclonelab/rclone.conf \
+                -O /usr/local/sessionSettings/rclone.conf"
+        )
+    else:
+        try:
+            print("Select config file (rclone.conf) from your computer.")
+            uploadedFileName = files.upload().keys()
+            if len(uploadedFileName) > 1:
+                for fn in uploadedFileName:
+                    runSh(f'rm -f "/content/{fn}"')
+                return print("Please only upload a single config file.")
+            elif len(uploadedFileName) == 0:
+                return print("File upload cancelled.")
+            else:
+                for fn in uploadedFileName:
+                    if checkAvailable(f"/content/{fn}"):
+                        runSh(
+                            f'mv -f "/content/{fn}" /usr/local/sessionSettings/rclone.conf'
+                        )
+                        runSh("chmod 666 /usr/local/sessionSettings/rclone.conf")
+                        runSh('rm -f "/content/{fn}"')
+                        print("Uploaded file successfully.")
+
+        except:
+            return print("Upload process Error.")
+
+
+def addUtils():
+    if checkAvailable("/content/sample_data"):
+        runSh("rm -rf /content/sample_data")
+    if not checkAvailable("/usr/local/sessionSettings"):
+        runSh("mkdir -p -m 777 /usr/local/sessionSettings")
+    if not checkAvailable("/content/upload.txt"):
+        runSh("touch /content/upload.txt")
+    if not checkAvailable("/root/.ipython/mixlab.py"):
+        runSh(
+            "wget -qq https://shirooo39.github.io/MiXLab/resources/mixlab.py \
+                -O /root/.ipython/mixlab.py"
+        )
+    if not checkAvailable("checkAptUpdate.txt", userPath=True):
+        runSh("apt update -qq -y")
+        runSh("apt-get install -y iputils-ping")
+        data = {"apt": "updated", "ping": "installed"}
+        accessSettingFile("checkAptUpdate.txt", data)
+
+
+def prepareSession():
+    if checkAvailable("ready.txt", userPath=True):
+        return
+    else:
+        addUtils()
+        configTimezone()
+        uploadRcloneConfig()
+        uploadQBittorrentConfig()
+        installRclone()
+        accessSettingFile("ready.txt", {"prepared": "True"})
+
+
+# rclone ======================================================================
+
+PATH_RClone_Config = "/usr/local/sessionSettings"
+
+
+def displayOutput(operationName="", color="#ce2121"):
+    if color == "success":
+        hColor = "#28a745"
+        displayTxt = f"👍 Operation {operationName} has been successfully executed!"
+    elif color == "danger":
+        hColor = "#dc3545"
+        displayTxt = f"❌ Operation {operationName} produced an error!"
+    elif color == "info":
+        hColor = "#17a2b8"
+        displayTxt = f"👋 Operation {operationName} has some information!"
+    elif color == "warning":
+        hColor = "#ffc107"
+        displayTxt = f"⚠ Operation {operationName} produced warning!"
+    else:
+        hColor = "#ffc107"
+        displayTxt = f"{operationName} works."
+    display(
+        HTML(
+            f"""
+            <center>
+                <h2 style="font-family:monospace;color:{hColor};">
+                    {displayTxt}
+                </h2>
+                <br>
+            </center>
+            """
+        )
+    )
+
+# JDownloader =================================================================
+
+Email = widgets.Text(placeholder="*Required", description="Email:")
+Password = widgets.Text(placeholder="*Required", description="Password:")
+Device = widgets.Text(placeholder="Optional", description="Name:")
+SavePath = widgets.Dropdown(
+    value="/content/Downloads",
+    options=["/content", "/content/Downloads"],
+    description="Save Path:",
+)
+
+
+def refreshJDPath(a=1):
+    if checkAvailable("/content/drive/"):
+        if checkAvailable("/content/drive/Shared drives/"):
+            SavePath.options = (
+                ["/content", "/content/Downloads", "/content/drive/My Drive"]
+                + glob("/content/drive/My Drive/*/")
+                + glob("/content/drive/Shared drives/*/")
+            )
+        else:
+            SavePath.options = [
+                "/content",
+                "/content/downloads",
+                "/content/drive/My Drive",
+            ] + glob("/content/drive/My Drive/*/")
+    else:
+        SavePath.options = ["/content", "/content/downloads"]
+
+
+def exitJDWeb():
+    runSh("pkill -9 -e -f java")
+    clear_output(wait=True)
+    createButton("Start", func=startJDService, style="info")
+
+
+def confirmJDForm(a):
+    clear_output(wait=True)
+    action = a.description
+    createButton(f"{action} Confirm?")
+    if action == "Restart":
+        createButton("Confirm", func=startJDService, style="danger")
+    else:
+        createButton("Confirm", func=exitJDWeb, style="danger")
+    createButton("Cancel", func=displayJDControl, style="warning")
+
+
+def displayJDControl(a=1):
+    clear_output(wait=True)
+    createButton("Control Panel")
+    display(
+        HTML(
+            """
+            <h3 style="font-family:Trebuchet MS;color:#4f8bd6;">
+                You can login to the WebUI by clicking
+                    <a href="https://my.jdownloader.org/" target="_blank">
+                        here
+                    </a>.
+            </h3>
+            """
+        ),
+        HTML(
+            """
+            <h4 style="font-family:Trebuchet MS;color:#4f8bd6;">
+                If the server didn't showup in 30 sec. please re-login.
+            </h4>
+            """
+        ),
+    )
+    createButton("Re-Login", func=displayJDLoginForm, style="info")
+    createButton("Restart", func=confirmJDForm, style="warning")
+    createButton("Exit", func=confirmJDForm, style="danger")
+
+
+def startJDService(a=1):
+    runSh("pkill -9 -e -f java")
+    runSh(
+        "java -jar /root/.JDownloader/JDownloader.jar -norestart -noerr -r &",
+        shell=True,  # nosec
+    )
+    displayJDControl()
+
+
+def displayJDLoginForm(a=1):
+    clear_output(wait=True)
+    Email.value = ""
+    Password.value = ""
+    Device.value = ""
+    refreshJDPath()
+    display(
+        HTML(
+            """
+            <h3 style="font-family:Trebuchet MS;color:#4f8bd6;">
+                If you don't have an account yet, please register
+                    <a href="https://my.jdownloader.org/login.html#register" target="_blank">
+                        here
+                    </a>.
+            </h3>
+            """
+        ),
+        HTML("<br>"),
+        Email,
+        Password,
+        Device,
+        SavePath,
+    )
+    createButton("Refresh", func=refreshJDPath)
+    createButton("Login", func=startJDFormLogin, style="info")
+    if checkAvailable(
+        "/root/.JDownloader/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json"
+    ):
+        createButton("Cancel", func=displayJDControl, style="danger")
+
+
+def startJDFormLogin(a=1):
+    try:
+        if not Email.value.strip():
+            ERROR = "Email field is empty."
+            THROW_ERROR
+        if not "@" in Email.value and not "." in Email.value:
+            ERROR = "Email is an incorrect format."
+            THROW_ERROR
+        if not Password.value.strip():
+            ERROR = "Password field is empty."
+            THROW_ERROR
+        if not bool(re.match("^[a-zA-Z0-9]+$", Device.value)) and Device.value.strip():
+            ERROR = "Only alphanumeric are allowed for the device name."
+            THROW_ERROR
+        clear_output(wait=True)
+        if SavePath.value == "/content":
+            savePath = {"defaultdownloadfolder": "/content/Downloads"}
+        elif SavePath.value == "/content/Downloads":
+            runSh("mkdir -p -m 666 /content/Downloads")
+            savePath = {"defaultdownloadfolder": "/content/Downloads"}
+        else:
+            savePath = {"defaultdownloadfolder": SavePath.value}
+
+        with open(
+            "/root/.JDownloader/cfg/org.jdownloader.settings.GeneralSettings.json", "w+"
+        ) as outPath:
+            json.dump(savePath, outPath)
+        if Device.value.strip() == "":
+            Device.value = Email.value
+        runSh("pkill -9 -e -f java")
+        data = {
+            "email": Email.value,
+            "password": Password.value,
+            "devicename": Device.value,
+            "directconnectmode": "LAN",
+        }
+        with open(
+            "/root/.JDownloader/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json",
+            "w+",
+        ) as outData:
+            json.dump(data, outData)
+        startJDService()
+    except:
+        print(ERROR)
+
+
+def handleJDLogin(newAccount):
+    installJDownloader()
+    if newAccount:
+        displayJDLoginForm()
+    else:
+        data = {
+            "email": "daniel.dungngo@gmail.com",
+            "password": "ZjPNiqjL4e6ckwM",
+            "devicename": "daniel.dungngo@gmail.com",
+            "directconnectmode": "LAN",
+        }
+        with open(
+            "/root/.JDownloader/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json",
+            "w+",
+        ) as outData:
+            json.dump(data, outData)
+        startJDService()
