@@ -1,9 +1,9 @@
-import os
+import os, time, uuid, re, ipywidgets as widgets, IPython, sys
 from sys import exit as exx
-import time
-import uuid
-import re
 from subprocess import Popen,PIPE
+from google.colab import files  # pylint: disable=import-error
+from glob import glob
+from IPython.display import HTML, display, clear_output
 
 HOME = os.path.expanduser("~")
 CWD = os.getcwd()
