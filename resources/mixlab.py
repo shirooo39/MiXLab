@@ -1,4 +1,6 @@
-import os, time, uuid, re, ipywidgets as widgets, IPython, sys, json
+import os, time, uuid, re, IPython, sys
+import json
+import ipywidgets as widgets
 from sys import exit as exx
 from subprocess import Popen,PIPE
 from google.colab import files  # pylint: disable=import-error
