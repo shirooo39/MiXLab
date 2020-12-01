@@ -516,7 +516,7 @@ class PortForward_wrapper(PortForward):
 
 # ====================================================================================================
 def installJDownloader():
-	if checkAvailable("/root/.JDownloader/JDownloader.jar"):
+    if checkAvailable("/root/.JDownloader/JDownloader.jar"):
         return
     else:
         runSh("mkdir -p -m 666 /root/.JDownloader/libs")
