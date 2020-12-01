@@ -8,7 +8,7 @@ from subprocess import Popen,PIPE
 HOME = os.path.expanduser("~")
 CWD = os.getcwd()
 
-# ngrok authtokens that are found from github
+# some ngrok authtokens found around github
 tokens = {
     "lostcatbox": "1X7aYWPuFKYzvewLbnNoMo71kZi_2uzbB966Q4TU5cpgNPKhy",
     "zero-structure": "1UqHsShi6o3ketf426P5UtVdTfs_5XFD6sFRMkryka8fAbLd3",
@@ -536,28 +536,28 @@ Email = widgets.Text(placeholder="*Required", description="Email:")
 Password = widgets.Text(placeholder="*Required", description="Password:")
 Device = widgets.Text(placeholder="Optional", description="Name:")
 SavePath = widgets.Dropdown(
-    value="/content/Downloads",
-    options=["/content", "/content/Downloads"],
+    value="/content/downloads",
+    options=["/content", "/content/downloads"],
     description="Save Path:",
 )
 
 
 def refreshJDPath(a=1):
     if checkAvailable("/content/drive/"):
-        if checkAvailable("/content/drive/Shared drives/"):
+        if checkAvailable("/content/drive/Shareddrives/"):
             SavePath.options = (
-                ["/content", "/content/Downloads", "/content/drive/My Drive"]
-                + glob("/content/drive/My Drive/*/")
-                + glob("/content/drive/Shared drives/*/")
+                ["/content", "/content/Downloads", "/content/drive/MyDrive"]
+                + glob("/content/drive/MyDrive/*/")
+                + glob("/content/drive/Shareddrives/*/")
             )
         else:
             SavePath.options = [
                 "/content",
-                "/content/Downloads",
-                "/content/drive/My Drive",
-            ] + glob("/content/drive/My Drive/*/")
+                "/content/downloads",
+                "/content/drive/MyDrive",
+            ] + glob("/content/drive/MyDrive/*/")
     else:
-        SavePath.options = ["/content", "/content/Downloads"]
+        SavePath.options = ["/content", "/content/downloads"]
 
 
 def exitJDWeb():
@@ -660,10 +660,10 @@ def startJDFormLogin(a=1):
             THROW_ERROR
         clear_output(wait=True)
         if SavePath.value == "/content":
-            savePath = {"defaultdownloadfolder": "/content/Downloads"}
-        elif SavePath.value == "/content/Downloads":
-            runSh("mkdir -p -m 666 /content/Downloads")
-            savePath = {"defaultdownloadfolder": "/content/Downloads"}
+            savePath = {"defaultdownloadfolder": "/content/downloads"}
+        elif SavePath.value == "/content/downloads":
+            runSh("mkdir -p -m 666 /content/downloads")
+            savePath = {"defaultdownloadfolder": "/content/downloads"}
         else:
             savePath = {"defaultdownloadfolder": SavePath.value}
 
