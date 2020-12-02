@@ -463,7 +463,7 @@ def updateCheck(self, Version):
         print("Script Update Checker: Your script is up to date.")
 
 class LocalhostRun:
-  def __init__(self,port,id=None,interval=30,retries=30):
+  def __init__(self,port,id=None,interval=120,retries=120):
     import os
     filePath = "/usr/local/sessionSettings/localhostDB.json"
     if not os.path.exists(filePath):
@@ -546,7 +546,7 @@ class PortForward:
           if v:
               clear_output()
               loadingAn(name="lds")
-              textAn("Starting localhost ...", ty="twg")
+              textAn("Starting localhost...", ty="twg")
           data = dict(url="http://"+LocalhostRun(port).keep_alive())
           if displayB:
               displayUrl(data, btc)
