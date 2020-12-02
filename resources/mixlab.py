@@ -463,7 +463,7 @@ def updateCheck(self, Version):
         print("Script Update Checker: Your script is up to date.")
 
 class LocalhostRun:
-  def __init__(self,port,id=None,interval=120,retries=120):
+  def __init__(self,port,id=None,interval=30,retries=30):
     import os
     filePath = "/usr/local/sessionSettings/localhostDB.json"
     if not os.path.exists(filePath):
@@ -510,7 +510,7 @@ class LocalhostRun:
         accessSettingFile("localhostDB.json" , localhostOpenDB, v=False)
         return newAddr
       except:
-        outs, errs = self.connection.communicate(timeout=15)
+        outs, errs = self.connection.communicate(timeout=30)
         self.connection.kill()
         # print(outs)
         # print(errs)
