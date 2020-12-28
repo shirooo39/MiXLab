@@ -260,6 +260,7 @@ def accessSettingFile(file="", setting={}):
 
 def memGiB():
     from os import sysconf as _sc  # pylint: disable=no-name-in-module
+
     return _sc("SC_PAGE_SIZE") * _sc("SC_PHYS_PAGES") / (1024.0 ** 3)
 # ====================================================================================================
 
@@ -274,6 +275,27 @@ def checkAvailable(path_="", userPath=False):
             if not userPath
             else _p.exists(f"/usr/local/sessionSettings/{path_}")
         )
+
+def accessSettingFile(file="", setting={}, v=True):
+    from json import load, dump
+
+    if not isinstance(setting, dict):
+        if v:print("Could only accept Dictionary object!")
+        exx()
+    fullPath = f"/usr/local/sessionSettings/{file}"
+    try:
+        if not len(setting):
+            if not checkAvailable(fullPath):
+                if v:print(f"File unavailable: {fullPath}.")
+                exx()
+            with open(fullPath) as jsonObj:
+                return load(jsonObj)
+        else:
+            with open(fullPath, "w+") as outfile:
+                dump(setting, outfile)
+    except:
+        if v:print(f"Error accessing the file: {fullPath}.")
+
 
 def displayUrl(data, btc='b', pNamU='Public URL: ', EcUrl=None, ExUrl=None, cls=True):
     from IPython.display import HTML, clear_output
@@ -731,47 +753,3 @@ def handleJDLogin(newAccount):
             json.dump(data, outData)
         startJDService()
 # ====================================================================================================
-# ====================================================================================================
-
-#PATH_RClone_Config renamed to rcloneConfigurationPath
-rcloneConfigurationPath = "/usr/local/sessionSettings"
-
-def displayOutput(operationName="", color="#ce2121"):
-    if color == "success":
-        hColor = "#28a745"
-        displayTxt = f"👍 Operation {operationName} has been successfully completed."
-    elif color == "danger":
-        hColor = "#dc3545"
-        displayTxt = f"❌ Operation {operationName} has been errored."
-    elif color == "info":
-        hColor = "#17a2b8"
-        displayTxt = f"👋 Operation {operationName} has some info."
-    elif color == "warning":
-        hColor = "#ffc107"
-        displayTxt = f"⚠ Operation {operationName} has been warning."
-    else:
-        hColor = "#ffc107"
-        displayTxt = f"{operationName} works."
-    display(
-        HTML(
-            f"""
-            <center>
-                <h2 style="font-family:monospace;color:{hColor};">
-                    {displayTxt}
-                </h2>
-                <br>
-            </center>
-            """
-        )
-    )
-
-def prepareSession():
-    if checkAvailable("ready.txt", userPath=True):
-        return
-    else:
-        addUtils()
-        configTimezone()
-        uploadRcloneConfig()
-        uploadQBittorrentConfig()
-        installRclone()
-        accessSettingFile("ready.txt", {"prepared": "True"})
