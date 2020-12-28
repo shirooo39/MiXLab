@@ -238,17 +238,17 @@ def generateRandomStr():
 
     return str(uuid4()).split("-")[0]
 
-def accessSettingFile(file="", setting={}):
+def accessSettingFile(file="", setting={}, v=True):
     from json import load, dump
 
     if not isinstance(setting, dict):
-        print("Only accept Dictionary object.")
+        if v:print("Could only accept Dictionary object!")
         exx()
     fullPath = f"/usr/local/sessionSettings/{file}"
     try:
         if not len(setting):
             if not checkAvailable(fullPath):
-                print(f"File unavailable: {fullPath}.")
+                if v:print(f"File unavailable: {fullPath}.")
                 exx()
             with open(fullPath) as jsonObj:
                 return load(jsonObj)
@@ -256,7 +256,7 @@ def accessSettingFile(file="", setting={}):
             with open(fullPath, "w+") as outfile:
                 dump(setting, outfile)
     except:
-        print(f"Error accessing the file: {fullPath}.")
+        if v:print(f"Error accessing the file: {fullPath}.")
 
 def memGiB():
     from os import sysconf as _sc  # pylint: disable=no-name-in-module
