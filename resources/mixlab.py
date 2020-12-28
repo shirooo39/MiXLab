@@ -765,6 +765,86 @@ def displayOutput(operationName="", color="#ce2121"):
         )
     )
 
+def addUtils():
+    if checkAvailable("/content/sample_data"):
+        runSh("rm -rf /content/sample_data")
+    if not checkAvailable("/usr/local/sessionSettings"):
+        runSh("mkdir -p -m 777 /usr/local/sessionSettings")
+    if not checkAvailable("/content/upload.txt"):
+        runSh("touch /content/upload.txt")
+    if not checkAvailable("/root/.ipython/mixlab.py"):
+        runSh(
+            "wget -qq https://shirooo39.github.io/MiXLab/resources/mixlab.py \
+                -O /root/.ipython/mixlab.py"
+        )
+    if not checkAvailable("checkAptUpdate.txt", userPath=True):
+        runSh("apt update -qq -y")
+        runSh("apt-get install -y iputils-ping")
+        data = {"apt": "updated", "ping": "installed"}
+        accessSettingFile("checkAptUpdate.txt", data)
+
+def configTimezone(auto=True):
+    if checkAvailable("timezone.txt", userPath=True):
+        return
+    if not auto:
+        runSh("sudo dpkg-reconfigure tzdata")
+    else:
+        runSh("sudo ln -fs /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime")
+        runSh("sudo dpkg-reconfigure -f noninteractive tzdata")
+    data = {"timezone": "Asia/Ho_Chi_Minh"}
+    accessSettingFile("timezone.txt", data)
+
+def installRclone():
+    if not checkAvailable("/usr/bin/rclone"):
+        runSh(
+            "curl -s https://rclone.org/install.sh | sudo bash",
+            shell=True,  # nosec
+        )
+
+def uploadRcloneConfig(localUpload=False):
+    if not localUpload and checkAvailable("rclone.conf", userPath=True):
+        return
+    elif not localUpload:
+        runSh(
+            "wget -qq https://shirooo39.github.io/MiXLab/resources/configurations/rclone/rclone.conf \
+                -O /usr/local/sessionSettings/rclone.conf"
+        )
+    else:
+        try:
+            print("Upload rclone.conf from your computer.")
+            uploadedFileName = files.upload().keys()
+            if len(uploadedFileName) > 1:
+                for fn in uploadedFileName:
+                    runSh(f'rm -f "/content/{fn}"')
+                return print("Please only upload a single configuration file.")
+            elif len(uploadedFileName) == 0:
+                return print("File upload have been cancelled.")
+            else:
+                for fn in uploadedFileName:
+                    if checkAvailable(f"/content/{fn}"):
+                        runSh(
+                            f'mv -f "/content/{fn}" /usr/local/sessionSettings/rclone.conf'
+                        )
+                        runSh("chmod 666 /usr/local/sessionSettings/rclone.conf")
+                        runSh('rm -f "/content/{fn}"')
+                        print("The file have been successfully uploaded.")
+
+        except:
+            return print("Upload failed!")
+
+def uploadQBittorrentConfig():
+    if checkAvailable("updatedQBSettings.txt", userPath=True):
+        return
+    runSh(
+        "mkdir -p -m 666 /content/qBittorrent /root/.qBittorrent_temp /root/.config/qBittorrent"
+    )
+    runSh(
+        "wget -qq https://shirooo39.github.io/MiXLab/resources/configurations/qbittorrent/qBittorrent.conf \
+            -O /root/.config/qBittorrent/qBittorrent.conf"
+    )
+    data = {"uploaded": "True"}
+    accessSettingFile("updatedQBSettings.txt", data)
+
 def prepareSession():
     if checkAvailable("ready.txt", userPath=True):
         return
