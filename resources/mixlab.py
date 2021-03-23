@@ -362,6 +362,8 @@ def installAutoSSH():
     else:
         runSh("apt-get install autossh -qq -y")
 
+
+
 def runSh(args, *, output=False, shell=False, cd=None):
     import subprocess, shlex
 
@@ -544,6 +546,7 @@ class ArgoTunnel:
   def kill(self):
     self.connection.kill()
 
+
 class jprq:
   def __init__(self, port, proto='http', ids=None):
     import os, uuid
@@ -593,6 +596,7 @@ class jprq:
   def kill(self):
     self.connection.kill()
 
+
 class PortForward:
   def __init__(self,connections,region=None,SERVICE="localhost",TOKEN=None,USE_FREE_TOKEN=None,config=None):
     c=dict()
@@ -603,6 +607,7 @@ class PortForward:
     self.config = config
     if SERVICE=="ngrok":self.ngrok=ngrok(TOKEN,USE_FREE_TOKEN,connections,region,self.config)
     self.SERVICE = SERVICE
+    
 
   def start(self,name,btc='b',displayB=True,v=True):
     from IPython.display import clear_output
@@ -624,7 +629,7 @@ class PortForward:
           return data
     elif self.SERVICE == "ngrok":
         return self.ngrok.start(name,btc,displayB,v)
-    elif self.SERVICE == "argo_tunnel":
+    elif self.SERVICE == "argotunnel":
         con=self.connections[name]
         port=con["port"]
         proto=con["proto"]
@@ -648,6 +653,7 @@ class PortForward:
         if displayB:
           displayUrl(data, btc)
         return data
+        
 
 class PortForward_wrapper(PortForward):
   def __init__(self,SERVICE,TOKEN,USE_FREE_TOKEN,connections,region,config):
@@ -656,6 +662,7 @@ class PortForward_wrapper(PortForward):
 
 def findPackageR(id_repo, p_name, tag_name=False, all_=False):
   import requests
+
   for rawData in requests.get(f"https://api.github.com/repos/{id_repo}/releases").json():
     if tag_name:
       if rawData['tag_name'] != tag_name:
@@ -665,7 +672,7 @@ def findPackageR(id_repo, p_name, tag_name=False, all_=False):
       if p_name == f['browser_download_url'][-len(p_name):]:
         rawData['assets'] = f 
         return f['browser_download_url'] if not all_ else rawData
-  raise Exception("Unable to use API!\n Try again with change package name!")
+  raise Exception("Unable to call the API!\n Try again with change packages name!")
 
 def closePort(port):
   import socket
@@ -675,7 +682,7 @@ def closePort(port):
         port += 1
       else:
         return port
-  raise Exception("Unable to find close port!")
+  raise Exception("Unable to close the port!")
 
 # ====================================================================================================
 def installJDownloader():
