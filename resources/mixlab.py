@@ -629,7 +629,7 @@ class PortForward:
           return data
     elif self.SERVICE == "ngrok":
         return self.ngrok.start(name,btc,displayB,v)
-    elif self.SERVICE == "argotunnel":
+    elif self.SERVICE == "argo_tunnel":
         con=self.connections[name]
         port=con["port"]
         proto=con["proto"]
