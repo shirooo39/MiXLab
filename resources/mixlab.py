@@ -1,8 +1,6 @@
-import os, time, uuid, re, IPython, sys
-import json
-import ipywidgets as widgets
+import os, time, uuid, re, IPython, sys, json, ipywidgets as widgets
 from sys import exit as exx
-from subprocess import Popen,PIPE
+from subprocess import Popen, PIPE
 from google.colab import files  # pylint: disable=import-error
 from glob import glob
 from IPython.display import HTML, display, clear_output
@@ -326,6 +324,22 @@ def findProcess(process, command="", isPid=False):
                     pass
             except:
                 continue
+
+def installArgoTunnel():
+    if checkAvailable(f"{HOME}/tools/argotunnel/cloudflared"):
+        return
+    else:
+        import os
+        from shutil import unpack_archive
+        from urllib.request import urlretrieve
+        
+        os.makedirs(f'{HOME}/tools/argotunnel/', exist_ok=True)
+        aTURL = findPackageR("cloudflare/cloudflared", "cloudflared-linux-amd64")
+        urlretrieve(aTURL, f'{HOME}/tools/argotunnel/cloudflared')
+        # unpack_archive('cloudflared.tgz',
+        #   f'{HOME}/tools/argotunnel')
+        os.chmod(f'{HOME}/tools/argotunnel/cloudflared', 0o755)
+        # os.unlink('cloudflared.tgz')
 
 def installNgrok():
     if checkAvailable("/usr/local/bin/ngrok"):
