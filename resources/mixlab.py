@@ -556,8 +556,10 @@ class jprq:
       open(filePath, 'w').close()
 
     if not ids:self.ids=str(uuid.uuid4())[:12]
-    #Installing jprq
+    
+    #Installing the jprq module
     runSh("pip install jprq")
+    runSh("pip install jprq --upgrade")
 
     self.connection=None
     self.proto=proto
@@ -578,7 +580,7 @@ class jprq:
           return oldAddr
       except:
         pass
-    hostname = f"MiXLab-{self.ids}"
+    hostname = f"mixlab-{self.ids}"
     self.connection=Popen(f"jprq -s {hostname} {self.port}".split(),
       stdout=PIPE, stdin=PIPE, stderr=PIPE)
     
