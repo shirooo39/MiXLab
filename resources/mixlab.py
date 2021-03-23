@@ -362,8 +362,6 @@ def installAutoSSH():
     else:
         runSh("apt-get install autossh -qq -y")
 
-
-
 def runSh(args, *, output=False, shell=False, cd=None):
     import subprocess, shlex
 
@@ -546,6 +544,55 @@ class ArgoTunnel:
   def kill(self):
     self.connection.kill()
 
+class jprq:
+  def __init__(self, port, proto='http', ids=None):
+    import os, uuid
+    filePath = "/usr/local/sessionSettings/jprqDB.json"
+    if not os.path.exists(filePath):
+      os.makedirs(filePath[:-11], exist_ok=True)
+      open(filePath, 'w').close()
+
+    if not ids:self.ids=str(uuid.uuid4())[:12]
+    #Installing jprq
+    runSh("pip install jprq")
+
+    self.connection=None
+    self.proto=proto
+    self.port=port
+
+  def keep_alive(self):
+    # if self.connection:self.connection.kill()
+    import urllib, requests, re
+    try:
+      jprqOpenDB = dict(accessSettingFile("jprqDB.json", v=False))
+    except TypeError:
+      jprqOpenDB = dict()
+
+    if findProcess("jprq", f"{self.port}"):
+      try:
+        oldAddr = jprqOpenDB[str(self.port)]
+        if requests.get("http://"+oldAddr).status_code == 200:
+          return oldAddr
+      except:
+        pass
+    hostname = f"MiXLab-{self.ids}"
+    self.connection=Popen(f"jprq -s {hostname} {self.port}".split(),
+      stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    
+    time.sleep(3)
+
+    # try:
+    #   return re.findall("https://(.*?.jprq.live/)", self.connection.stdout.readline().decode("utf-8"))[0]
+    # except:
+    #   raise Exception(self.connection.stdout.readline().decode("utf-8"))
+    hostname += ".jprq.live"
+    jprqOpenDB[str(self.port)] = hostname
+    accessSettingFile("jprqDB.json" , jprqOpenDB, v=False)
+    return hostname
+
+  def kill(self):
+    self.connection.kill()
+
 class PortForward:
   def __init__(self,connections,region=None,SERVICE="localhost",TOKEN=None,USE_FREE_TOKEN=None,config=None):
     c=dict()
@@ -570,7 +617,7 @@ class PortForward:
           if v:
               clear_output()
               loadingAn(name="lds")
-              textAn("Starting localhost ...", ty="twg")
+              textAn("Starting localhost...", ty="twg")
           data = dict(url="https://"+LocalhostRun(port).keep_alive())
           if displayB:
               displayUrl(data, btc)
@@ -584,7 +631,7 @@ class PortForward:
         if v:
           clear_output()
           loadingAn(name="lds")
-          textAn("Starting Argo Tunnel ...", ty="twg")
+          textAn("Starting argo tunnel...", ty="twg")
         data = dict(url="https://"+ArgoTunnel(port, proto, closePort(self.config[1])).keep_alive())
         if displayB:
           displayUrl(data, btc)
@@ -596,7 +643,7 @@ class PortForward:
         if v:
           clear_output()
           loadingAn(name="lds")
-          textAn("Starting jprq ...", ty="twg")
+          textAn("Starting jprq...", ty="twg")
         data = dict(url="https://"+jprq(port, proto).keep_alive())
         if displayB:
           displayUrl(data, btc)
