@@ -882,21 +882,21 @@ def handleJDLogin(newAccount):
 # ====================================================================================================
 
 #PATH_RClone_Config renamed to rcloneConfigurationPath
-rcloneConfigurationPath = "/usr/local/sessionSettings"
+rcloneConfigurationPath = "/root/.config/rclone"
 
 def displayOutput(operationName="", color="#ce2121"):
     if color == "success":
         hColor = "#28a745"
-        displayTxt = f"👍 Operation {operationName} has been successfully completed."
+        displayTxt = f"👍 Operation {operationName} has been successfully performed."
     elif color == "danger":
         hColor = "#dc3545"
-        displayTxt = f"❌ Operation {operationName} has been errored."
+        displayTxt = f"❌ Unable to perform operation {operationName}!"
     elif color == "info":
         hColor = "#17a2b8"
-        displayTxt = f"👋 Operation {operationName} has some info."
+        displayTxt = f"👋 Operation {operationName} have some information."
     elif color == "warning":
         hColor = "#ffc107"
-        displayTxt = f"⚠ Operation {operationName} has been warning."
+        displayTxt = f"⚠ Operation {operationName} have a warning!"
     else:
         hColor = "#ffc107"
         displayTxt = f"{operationName} works."
