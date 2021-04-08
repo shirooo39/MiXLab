@@ -942,12 +942,12 @@ def configTimezone(auto=True):
     data = {"timezone": "Asia/Ho_Chi_Minh"}
     accessSettingFile("timezone.txt", data)
 
-def installRclone():
-    if not checkAvailable("/usr/bin/rclone"):
-        runSh(
-            "curl -s https://rclone.org/install.sh | sudo bash",
-            shell=True,  # nosec
-        )
+#def installRclone():
+#    if not checkAvailable("/usr/bin/rclone"):
+#        runSh(
+#            "curl -s https://rclone.org/install.sh | sudo bash",
+#            shell=True,  # nosec
+#        )
 
 def uploadRcloneConfig(localUpload=False):
     if not localUpload and checkAvailable("rclone.conf", userPath=True):
@@ -1001,5 +1001,5 @@ def prepareSession():
         configTimezone()
         uploadRcloneConfig()
         uploadQBittorrentConfig()
-        installRclone()
+        #installRclone()
         accessSettingFile("ready.txt", {"prepared": "True"})
