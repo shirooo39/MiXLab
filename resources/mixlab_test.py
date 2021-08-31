@@ -1,206 +1,180 @@
-import os, time, uuid, re
+import os
 from sys import exit as exx
-from subprocess import Popen, PIPE
-
+import time
+import uuid
+import re
+from subprocess import Popen,PIPE
 
 HOME = os.path.expanduser("~")
 CWD = os.getcwd()
 tokens = {}
 
-
-####################################################################################################
-# ngrok Module
 class ngrok:
-    def __init__(self, TOKEN=None, USE_FREE_TOKEN=True, service=[['Service1', 80, 'tcp'], ['Service2', 8080, 'tcp']], region='us', dBug=[f"{HOME}/.ngrok2/ngrok.yml", 4040]):
-        self.region = region
-        self.configPath, self.dport = dBug
-        self.TOKEN = TOKEN
-        self.USE_FREE_TOKEN = USE_FREE_TOKEN
-        self.service = service
 
-        if USE_FREE_TOKEN:
-            self.sdict = {}
+  def __init__(self, TOKEN=None, USE_FREE_TOKEN=True,
+               service=[['Service1', 80, 'tcp'], ['Service2', 8080, 'tcp']],
+               region='us',
+               dBug=[f"{HOME}/.ngrok2/ngrok.yml", 4040]):
+    self.region = region
+    self.configPath, self.dport = dBug
+    self.TOKEN = TOKEN
+    self.USE_FREE_TOKEN = USE_FREE_TOKEN
+    self.service = service
+    if USE_FREE_TOKEN:
+      self.sdict = {}
+      for i, sn in enumerate(service):
+        tempcP = f'{HOME}/.ngrok2/'+sn[0]+'.yml'
+        # Port, Protocol, config path
+        self.sdict[sn[0]] = [self.dport+i, sn[2], tempcP]
 
-            for i, sn in enumerate(service):
-                tempcP = f'{HOME}/.ngrok2/'+sn[0]+'.yml'
-                # Port, Protocol, config path
-                self.sdict[sn[0]] = [self.dport+i, sn[2], tempcP]
-
-
-    def nameport(self, TOKEN, AUTO):
-        if AUTO:
-            try:
-                return tokens.popitem()[1]
-
-            except KeyError:
-                return "Invalid Token"
-
-        elif not TOKEN:
-            if not 'your' in tokens.keys():
-                from IPython import get_ipython
-                from IPython.display import clear_output
-                ipython = get_ipython()
-
-                print(r"Copy your ngrok authtoken from https://dashboard.ngrok.com/auth")
-
-                __temp = ipython.magic('%sx read -p "Token :"')
-                tokens['your'] = __temp[0].split(':')[1]
-                USR_Api = "your"
-
-                clear_output()
-
-            else:
-                USR_Api = "your"
-
-        else:
-            USR_Api = "mind"
-            tokens["mind"] = TOKEN
-
-        return tokens[USR_Api]
-
-
-    def ngrok_config(self, token, Gport, configPath, region, service):
-        import os
-
-        data = """
-        region: {}
-        update: false
-        update_channel: stable
-        web_addr: localhost:{}
-        tunnels:\n""".format(region, Gport)
-
-        if not self.USE_FREE_TOKEN:
-            auth ="""
-            authtoken: {}""".format(token)
-            data = auth+data
-            tunnels = ""
-
-            for S in service:
-                Sn, Sp, SpC = S
-                tunnels += """      {}:
-                addr: {}
-                proto: {}
-                inspect: false\n""".format(Sn, Sp, SpC)
-
-            data = data + tunnels
-            os.makedirs(f'{HOME}/.ngrok2/', exist_ok=True)
-
-            with open(configPath, "w+") as configFile:
-                configFile.write(data)
-            return True
-
-
-    def startWebUi(self, token, dport, nServer, region, btc, configPath, displayB, service, v):
-        import os, time, urllib
-        from IPython.display import clear_output
-        from json import loads
-
-        if token == "Invalid Token":
-            print(tokens)
-            os.exit()
-
-        installNgrok()
-
-        if v:
-            clear_output()
-            loadingAn(name="lds")
-            textAn("Starting tunnel ngrok...", ty='twg')
-
-        if self.USE_FREE_TOKEN:
-            for sn in service:
-                self.ngrok_config(
-                token,
-                self.sdict[nServer][0],
-                self.sdict[nServer][2],
-                region,
-                service)
-
-                if sn[0] == nServer:
-                    runSh(f"ngrok {sn[2]} -config={self.sdict[nServer][2]} {sn[1]} &", shell=True)
-
-        else:
-            self.ngrok_config(token, dport, configPath, region, service)
-            runSh(f"ngrok start --config {configPath} --all &", shell=True)
-            time.sleep(3)
-
-            try:
-                if self.USE_FREE_TOKEN:
-                    dport = self.sdict[nServer][0]
-                    nServer = 'command_line'
-                    host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
-
-                else:
-                    host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
-                    host = loads(host.read())['tunnels']
-
-                    for h in host:
-                        if h['name'] == nServer:
-                            host = h['public_url'][8:]
-                            break
-
-            except urllib.error.URLError:
-                if v:
-                    clear_output()
-                    loadingAn(name="lds")
-                    textAn("Ngrok Token is in used!. Again trying token ...", ty='twg')
-                    time.sleep(2)
-                    return True
-
-        data = {"url": f"https://{host}"}
-
-        if displayB:
-            displayUrl(data, btc)
-            return data
-
-
-    def start(self, nServer, btc='b', displayB=True, v=True):
-        import urllib
-        from IPython.display import clear_output
-        from json import loads
-
+  def nameport(self, TOKEN, AUTO):
+    if AUTO:
         try:
-            nServerbk = nServer
+            return tokens.popitem()[1]
+        except KeyError:
+            return "Invalid Token"
+    elif not TOKEN:
+        if not 'your' in tokens.keys():
+            from IPython import get_ipython
+            from IPython.display import clear_output
+            ipython = get_ipython()
 
-            if self.USE_FREE_TOKEN:
-                dport = self.sdict[nServer][0]
-                nServer = 'command_line'
-
+            print(r"Copy authtoken from https://dashboard.ngrok.com/auth")
+            __temp = ipython.magic('%sx read -p "Token :"')
+            tokens['your'] = __temp[0].split(':')[1]
+            USR_Api = "your"
+            clear_output()
         else:
-            dport = self.dport
+            USR_Api = "your"
+    else:
+        USR_Api = "mind"
+        tokens["mind"] = TOKEN
+    return tokens[USR_Api]
 
-        host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
+
+  def ngrok_config(self, token, Gport, configPath, region, service):
+    import os
+    data = """
+    region: {}
+    update: false
+    update_channel: stable
+    web_addr: localhost:{}
+    tunnels:\n""".format(region, Gport)
+    if not self.USE_FREE_TOKEN:
+      auth ="""
+    authtoken: {}""".format(token)
+      data = auth+data
+    tunnels = ""
+    for S in service:
+        Sn, Sp, SpC = S
+        tunnels += """      {}:
+        addr: {}
+        proto: {}
+        inspect: false\n""".format(Sn, Sp, SpC)
+    data = data + tunnels
+    os.makedirs(f'{HOME}/.ngrok2/', exist_ok=True)
+    with open(configPath, "w+") as configFile:
+        configFile.write(data)
+    return True
+
+
+  def startWebUi(self, token, dport, nServer, region, btc, configPath,
+               displayB, service, v):
+    import os, time, urllib
+    from IPython.display import clear_output
+    from json import loads
+
+    if token == "Invalid Token":
+        print(tokens)
+        os.exit()
+
+    installNgrok()
+    if v:
+      clear_output()
+      loadingAn(name="lds")
+      textAn("Starting ngrok ...", ty='twg')
+    if self.USE_FREE_TOKEN:
+      for sn in service:
+        self.ngrok_config(
+          token,
+          self.sdict[nServer][0],
+          self.sdict[nServer][2],
+          region,
+          service)
+        if sn[0] == nServer:
+          runSh(f"ngrok {sn[2]} -config={self.sdict[nServer][2]} {sn[1]} &", shell=True)
+    else:
+      self.ngrok_config(token, dport, configPath, region, service)
+      runSh(f"ngrok start --config {configPath} --all &", shell=True)
+    time.sleep(3)
+    try:
+        if self.USE_FREE_TOKEN:
+          dport = self.sdict[nServer][0]
+          nServer = 'command_line'
+          host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
+        else:
+          host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
         host = loads(host.read())['tunnels']
-
         for h in host:
-            if h['name'] == nServer:
-                host = h['public_url'][8:]
-                data = {"url": f"https://{host}"}
+          if h['name'] == nServer:
+            host = h['public_url'][8:]
+            break
+    except urllib.error.URLError:
+        if v:
+          clear_output()
+          loadingAn(name="lds")
+          textAn("Ngrok Token is in used!. Again trying token ...", ty='twg')
+        time.sleep(2)
+        return True
 
-            if displayB:
-                displayUrl(data, btc)
-            return data
+    data = {"url": f"https://{host}"}
+    if displayB:
+      displayUrl(data, btc)
+    return data
 
-        raise Exception('No tunnel has been found.')
-            except urllib.error.URLError:
-            for run in range(10):
-                if v:
-                clear_output()
-                loadingAn(name='lds')
-                dati = self.startWebUi(
-                    self.nameport(self.TOKEN, self.USE_FREE_TOKEN) if not self.USE_FREE_TOKEN else {},
-                    self.dport,
-                    nServerbk,
-                    self.region,
-                    btc,
-                    self.configPath,
-                    displayB,
-                    self.service,
-                    v
-                    )
-                if dati == True:
-                    continue
-                return dati
 
+  def start(self, nServer, btc='b', displayB=True, v=True):
+    import urllib
+    from IPython.display import clear_output
+    from json import loads
+
+    try:
+      nServerbk = nServer
+      if self.USE_FREE_TOKEN:
+          dport = self.sdict[nServer][0]
+          nServer = 'command_line'
+      else:
+        dport = self.dport
+      host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
+      host = loads(host.read())['tunnels']
+      for h in host:
+        if h['name'] == nServer:
+          host = h['public_url'][8:]
+          data = {"url": f"https://{host}"}
+          if displayB:
+            displayUrl(data, btc)
+          return data
+
+      raise Exception('Not found tunnels')
+    except urllib.error.URLError:
+      for run in range(10):
+        if v:
+          clear_output()
+          loadingAn(name='lds')
+        dati = self.startWebUi(
+            self.nameport(self.TOKEN, self.USE_FREE_TOKEN) if not self.USE_FREE_TOKEN else {},
+            self.dport,
+            nServerbk,
+            self.region,
+            btc,
+            self.configPath,
+            displayB,
+            self.service,
+            v
+            )
+        if dati == True:
+            continue
+        return dati
 
 def checkAvailable(path_="", userPath=False):
     from os import path as _p
@@ -214,16 +188,13 @@ def checkAvailable(path_="", userPath=False):
             else _p.exists(f"/usr/local/sessionSettings/{path_}")
         )
 
-
 def accessSettingFile(file="", setting={}, v=True):
     from json import load, dump
 
     if not isinstance(setting, dict):
-        if v:print("Only accept dictionary object.")
+        if v:print("Only accept Dictionary object.")
         exx()
-
     fullPath = f"/usr/local/sessionSettings/{file}"
-
     try:
         if not len(setting):
             if not checkAvailable(fullPath):
@@ -243,16 +214,13 @@ def displayUrl(data, btc='b', pNamU='Public URL: ', EcUrl=None, ExUrl=None, cls=
 
     if cls:
         clear_output()
-
     showTxT = f'{pNamU}{data["url"]}'
-
     if EcUrl:
       showUrL = data["url"]+EcUrl
     elif ExUrl:
       showUrL = ExUrl
     else:
       showUrL = data["url"]
-
     if btc == 'b':
           # blue
           bttxt = 'hsla(210, 50%, 85%, 1)'
@@ -293,8 +261,6 @@ def findProcess(process, command="", isPid=False):
             except:
                 continue
 
-####################################################################################################
-# Tunnel Modules Installation
 def installArgoTunnel():
     if checkAvailable(f"{HOME}/tools/argotunnel/cloudflared"):
         return
@@ -331,7 +297,7 @@ def installAutoSSH():
         return
     else:
         runSh("apt-get install autossh -qq -y")
-####################################################################################################
+
 
 
 def runSh(args, *, output=False, shell=False, cd=None):
@@ -364,9 +330,6 @@ def runSh(args, *, output=False, shell=False, cd=None):
             )
         return subprocess.run(args, shell=True, cwd=cd).returncode
 
-
-####################################################################################################
-# Animations
 def loadingAn(name="cal"):
       from IPython.display import HTML
 
@@ -383,324 +346,275 @@ def textAn(TEXT, ty='d'):
       elif ty == 'twg':
             textcover = str(len(TEXT)*0.55)
             return display(HTML('''<style>@import url(https://fonts.googleapis.com/css?family=Anonymous+Pro);.line-1{font-family: 'Anonymous Pro', monospace;    position: relative;   border-right: 1px solid;    font-size: 15px;   white-space: nowrap;    overflow: hidden;    }.anim-typewriter{  animation: typewriter 0.4s steps(44) 0.2s 1 normal both,             blinkTextCursor 600ms steps(44) infinite normal;}@keyframes typewriter{  from{width: 0;}  to{width: '''+textcover+'''em;}}@keyframes blinkTextCursor{  from{border-right:2px;}  to{border-right-color: transparent;}}</style><div class="line-1 anim-typewriter">'''+TEXT+'''</div>'''))
-####################################################################################################
-
 
 class LocalhostRun:
-    def __init__(self,port,id=None,interval=30,retries=30):
-        import os
+  def __init__(self,port,id=None,interval=30,retries=30):
+    import os
+    filePath = "/usr/local/sessionSettings/localhostDB.json"
+    if not os.path.exists(filePath):
+      os.makedirs(filePath[:-16], exist_ok=True)
+      open(filePath, 'w').close()
+    installAutoSSH()
+    if not id:id=str(uuid.uuid4())[:8]
+    self.connection=None
+    self.id=id
+    self.port=port
+    self.interval=interval
+    self.retries=retries
 
-        filePath = "/usr/local/sessionSettings/localhostDB.json"
-        
-        if not os.path.exists(filePath):
-            os.makedirs(filePath[:-16], exist_ok=True)
-            open(filePath, 'w').close()
-            installAutoSSH()
+  def start(self):
+    if self.connection:self.connection.kill()
+    self.connection=Popen(f"ssh -R 80:localhost:{self.port} {self.id}@ssh.localhost.run -o StrictHostKeyChecking=no".split(), stdout=PIPE, stdin=PIPE)
+    try:
+      return re.findall("http://(.*?.localhost.run)",self.connection.stdout.readline().decode("utf-8"))[0]
+    except:
+      raise Exception(self.connection.stdout.readline().decode("utf-8"))
 
-        if not id:id=str(uuid.uuid4())[:8]
-            self.connection=None
-            self.id=id
-            self.port=port
-            self.interval=interval
-            self.retries=retries
+  def keep_alive(self):
+    # if self.connection:self.connection.kill()
+    import urllib
+    try:
+      localhostOpenDB = dict(accessSettingFile("localhostDB.json", v=False))
+    except TypeError:
+      localhostOpenDB = dict()
 
-
-    def start(self):
-        if self.connection:self.connection.kill()
-            self.connection=Popen(f"ssh -R 80:localhost:{self.port} {self.id}@ssh.localhost.run -o StrictHostKeyChecking=no".split(), stdout=PIPE, stdin=PIPE)
-        try:
-            return re.findall("http://(.*?.localhost.run)",self.connection.stdout.readline().decode("utf-8"))[0]
-        except:
-            raise Exception(self.connection.stdout.readline().decode("utf-8"))
-
-
-    def keep_alive(self):
-        # if self.connection:self.connection.kill()
-        import urllib
-
-        try:
-            localhostOpenDB = dict(accessSettingFile("localhostDB.json", v=False))
-            except TypeError:
-            localhostOpenDB = dict()
-
-        if findProcess("autossh", f"80:localhost:{self.port}"):
-        try:
-            oldAddr = localhostOpenDB[str(self.port)]
-            urllib.request.urlopen("http://"+oldAddr)
-            return oldAddr
-        except:
-            pass
-
-        for _ in range(2):
-            self.connection=Popen(f"autossh -R 80:localhost:{self.port} {self.id}@ssh.localhost.run -o StrictHostKeyChecking=no -o ServerAliveInterval={self.interval} -o ServerAliveCountMax={self.retries}".split(), stdout=PIPE, stdin=PIPE, stderr=PIPE)
-            #print("ssh -R 80:localhost:{self.port} {self.id}@ssh.localhost.run -o StrictHostKeyChecking=no -o ServerAliveInterval={self.interval} -o ServerAliveCountMax={self.retries}")
-
-        try:
-            newAddr = re.findall("(.*?.localhost.run)", self.connection.stdout.readline().decode("utf-8"))[0]
-            localhostOpenDB[str(self.port)] = newAddr 
-            accessSettingFile("localhostDB.json" , localhostOpenDB, v=False)
-
-            return newAddr
-        except:
-            outs, errs = self.connection.communicate(timeout=15)
-            self.connection.kill()
-            # print(outs)
-            # print(errs)
-
-            if re.search(r"Permission\sdenied\s\(publickey\)", errs.decode("utf-8")):
-                os.system("ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa")
-                continue
-
-                raise Exception(errs.decode("utf-8"))
-
-        break
-
-    def kill(self):
+    if findProcess("autossh", f"80:localhost:{self.port}"):
+      try:
+        oldAddr = localhostOpenDB[str(self.port)]
+        urllib.request.urlopen("http://"+oldAddr)
+        return oldAddr
+      except:
+        pass
+    for _ in range(2):
+      self.connection=Popen(f"autossh -R 80:localhost:{self.port} {self.id}@ssh.localhost.run -o StrictHostKeyChecking=no -o ServerAliveInterval={self.interval} -o ServerAliveCountMax={self.retries}".split(),
+        stdout=PIPE, stdin=PIPE, stderr=PIPE)
+      #print("ssh -R 80:localhost:{self.port} {self.id}@ssh.localhost.run -o StrictHostKeyChecking=no -o ServerAliveInterval={self.interval} -o ServerAliveCountMax={self.retries}")
+      try:
+        newAddr = re.findall("(.*?.localhost.run)", self.connection.stdout.readline().decode("utf-8"))[0]
+        localhostOpenDB[str(self.port)] = newAddr 
+        accessSettingFile("localhostDB.json" , localhostOpenDB, v=False)
+        return newAddr
+      except:
+        outs, errs = self.connection.communicate(timeout=15)
         self.connection.kill()
+        # print(outs)
+        # print(errs)
+        if re.search(r"Permission\sdenied\s\(publickey\)", errs.decode("utf-8")):
+          os.system("ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa")
+          continue
+        raise Exception(errs.decode("utf-8"))
+      break
 
+  def kill(self):
+    self.connection.kill()
 
 class ArgoTunnel:
-    def __init__(self, port, proto='http', metrics=49589, interval=30, retries=30):
-        import os
+  def __init__(self, port, proto='http', metrics=49589, interval=30, retries=30):
+    import os
+    filePath = "/usr/local/sessionSettings/argotunnelDB.json"
+    if not os.path.exists(filePath):
+      os.makedirs(filePath[:-17], exist_ok=True)
+      open(filePath, 'w').close()
+    
+    #Installing argotunnel
+    installArgoTunnel()
 
-        filePath = "/usr/local/sessionSettings/argotunnelDB.json"
+    self.connection=None
+    self.proto=proto
+    self.port=port
+    self.metricPort=metrics
+    self.interval=interval
+    self.retries=retries
 
-        if not os.path.exists(filePath):
-            os.makedirs(filePath[:-17], exist_ok=True)
-            open(filePath, 'w').close()
+  # def start(self):
+  #   if self.connection:self.connection.kill()
+  #   # self.connection=Popen(f"ssh -R 80:localhost:{self.port} {self.id}@ssh.localhost.run -o StrictHostKeyChecking=no".split(), stdout=PIPE, stdin=PIPE)
+  #   self.connection=Popen(f"/content/tools/argotunnel/cloudflared tunnel --url {self.proto}://0.0.0.0:{self.port} --logfile cloudflared.log".split(), stdout=PIPE, stdin=PIPE)
+  #   try:
+  #     return re.findall("https://(.*?.trycloudflare.com)",self.connection.stdout.readline().decode("utf-8"))[0]
+  #   except:
+  #     raise Exception(self.connection.stdout.readline().decode("utf-8"))
+
+  def keep_alive(self):
+    # if self.connection:self.connection.kill()
+    import urllib, requests, re
+    from urllib.error import HTTPError
+    
+    try:
+      argotunnelOpenDB = dict(accessSettingFile("argotunnelDB.json", v=False))
+    except TypeError:
+      argotunnelOpenDB = dict()
+
+    if findProcess("cloudflared", f"localhost:{self.metricPort}"):
+      try:
+        oldAddr = argotunnelOpenDB[str(self.port)]
+        if requests.get("http://"+oldAddr).status_code == 200:
+          return oldAddr
+      except:
+        pass
+
+    self.connection=Popen(f"{HOME}/tools/argotunnel/cloudflared tunnel --url {self.proto}://0.0.0.0:{self.port} --logfile {HOME}/tools/argotunnel/cloudflared_{self.port}.log --metrics localhost:{self.metricPort}".split(),
+      stdout=PIPE, stdin=PIPE, stderr=PIPE, universal_newlines=True)
+    
+    time.sleep(5)
+
+    hostname = None
+    for i in range(20):
+      try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{self.metricPort}/metrics") as response:
+            hostname = re.search(r'userHostname=\"https://(.+)\"',
+             response.read().decode('utf-8'), re.MULTILINE)
+            if not hostname:
+              time.sleep(1)
+              continue
+            hostname = hostname.group(1)
+            break
+      except HTTPError:
+        time.sleep(2)
         
-        #Installing argotunnel
-        installArgoTunnel()
+    if not hostname:
+      raise RuntimeError("Failed to get user hostname from cloudflared")
+    
+    argotunnelOpenDB[str(self.port)] = hostname
+    accessSettingFile("argotunnelDB.json" , argotunnelOpenDB, v=False)
+    return hostname
 
-        self.connection=None
-        self.proto=proto
-        self.port=port
-        self.metricPort=metrics
-        self.interval=interval
-        self.retries=retries
-
-
-    # def start(self):
-    #   if self.connection:self.connection.kill()
-    #   # self.connection=Popen(f"ssh -R 80:localhost:{self.port} {self.id}@ssh.localhost.run -o StrictHostKeyChecking=no".split(), stdout=PIPE, stdin=PIPE)
-    #   self.connection=Popen(f"/content/tools/argotunnel/cloudflared tunnel --url {self.proto}://0.0.0.0:{self.port} --logfile cloudflared.log".split(), stdout=PIPE, stdin=PIPE)
-    #   try:
-    #     return re.findall("https://(.*?.trycloudflare.com)",self.connection.stdout.readline().decode("utf-8"))[0]
-    #   except:
-    #     raise Exception(self.connection.stdout.readline().decode("utf-8"))
-
-
-    def keep_alive(self):
-        # if self.connection:self.connection.kill()
-        import urllib, requests, re
-        from urllib.error import HTTPError
-        
-        try:
-            argotunnelOpenDB = dict(accessSettingFile("argotunnelDB.json", v=False))
-        except TypeError:
-            argotunnelOpenDB = dict()
-
-        if findProcess("cloudflared", f"localhost:{self.metricPort}"):
-            try:
-                oldAddr = argotunnelOpenDB[str(self.port)]
-                if requests.get("http://"+oldAddr).status_code == 200:
-                return oldAddr
-            except:
-                pass
-
-        self.connection=Popen(f"{HOME}/tools/argotunnel/cloudflared tunnel --url {self.proto}://0.0.0.0:{self.port} --logfile {HOME}/tools/argotunnel/cloudflared_{self.port}.log --metrics localhost:{self.metricPort}".split(),
-        stdout=PIPE, stdin=PIPE, stderr=PIPE, universal_newlines=True)
-        
-        time.sleep(5)
-
-        hostname = None
-        for i in range(20):
-            try:
-                with urllib.request.urlopen(f"http://127.0.0.1:{self.metricPort}/metrics") as response:
-                    hostname = re.search(r'userHostname=\"https://(.+)\"',
-                    response.read().decode('utf-8'), re.MULTILINE)
-                    if not hostname:
-                    time.sleep(1)
-                    continue
-                    hostname = hostname.group(1)
-                    break
-            except HTTPError:
-                time.sleep(2)
-            
-        if not hostname:
-            raise RuntimeError("Failed to get user hostname from cloudflared")
-        
-        argotunnelOpenDB[str(self.port)] = hostname
-        accessSettingFile("argotunnelDB.json" , argotunnelOpenDB, v=False)
-        
-        return hostname
-
-
-    def kill(self):
-        self.connection.kill()
-
+  def kill(self):
+    self.connection.kill()
 
 class jprq:
-    def __init__(self, port, proto='http', ids=None):
-        import os, uuid
+  def __init__(self, port, proto='http', ids=None):
+    import os, uuid
+    filePath = "/usr/local/sessionSettings/jprqDB.json"
+    if not os.path.exists(filePath):
+      os.makedirs(filePath[:-11], exist_ok=True)
+      open(filePath, 'w').close()
 
-        filePath = "/usr/local/sessionSettings/jprqDB.json"
+    if not ids:self.ids=str(uuid.uuid4())[:12]
+    #Installing jprq
+    runSh("pip install jprq")
 
-        if not os.path.exists(filePath):
-            os.makedirs(filePath[:-11], exist_ok=True)
-            open(filePath, 'w').close()
+    self.connection=None
+    self.proto=proto
+    self.port=port
 
-        if not ids:self.ids=str(uuid.uuid4())[:12]
-            #Installing jprq
-            runSh("pip install jprq")
+  def keep_alive(self):
+    # if self.connection:self.connection.kill()
+    import urllib, requests, re
+    try:
+      jprqOpenDB = dict(accessSettingFile("jprqDB.json", v=False))
+    except TypeError:
+      jprqOpenDB = dict()
 
-        self.connection=None
-        self.proto=proto
-        self.port=port
+    if findProcess("jprq", f"{self.port}"):
+      try:
+        oldAddr = jprqOpenDB[str(self.port)]
+        if requests.get("http://"+oldAddr).status_code == 200:
+          return oldAddr
+      except:
+        pass
+    hostname = f"OneClickRun-{self.ids}"
+    self.connection=Popen(f"jprq -s {hostname} {self.port}".split(),
+      stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    
+    time.sleep(3)
 
+    # try:
+    #   return re.findall("https://(.*?.jprq.live/)", self.connection.stdout.readline().decode("utf-8"))[0]
+    # except:
+    #   raise Exception(self.connection.stdout.readline().decode("utf-8"))
+    hostname += ".jprq.live"
+    jprqOpenDB[str(self.port)] = hostname
+    accessSettingFile("jprqDB.json" , jprqOpenDB, v=False)
+    return hostname
 
-    def keep_alive(self):
-        # if self.connection:self.connection.kill()
-        import urllib, requests, re
-
-        try:
-            jprqOpenDB = dict(accessSettingFile("jprqDB.json", v=False))
-        except TypeError:
-            jprqOpenDB = dict()
-
-        if findProcess("jprq", f"{self.port}"):
-            try:
-                oldAddr = jprqOpenDB[str(self.port)]
-                if requests.get("http://"+oldAddr).status_code == 200:
-                return oldAddr
-            except:
-                pass
-
-            hostname = f"OneClickRun-{self.ids}"
-            self.connection=Popen(f"jprq -s {hostname} {self.port}".split(),
-            stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        
-        time.sleep(3)
-
-        # try:
-        #   return re.findall("https://(.*?.jprq.live/)", self.connection.stdout.readline().decode("utf-8"))[0]
-        # except:
-        #   raise Exception(self.connection.stdout.readline().decode("utf-8"))
-        hostname += ".jprq.live"
-        jprqOpenDB[str(self.port)] = hostname
-        accessSettingFile("jprqDB.json" , jprqOpenDB, v=False)
-
-        return hostname
-
-    def kill(self):
-        self.connection.kill()
-
+  def kill(self):
+    self.connection.kill()
 
 class PortForward:
-    def __init__(self,connections,region=None,SERVICE="localhost",TOKEN=None,USE_FREE_TOKEN=None,config=None):
-        c=dict()
+  def __init__(self,connections,region=None,SERVICE="localhost",TOKEN=None,USE_FREE_TOKEN=None,config=None):
+    c=dict()
+    for con in connections:
+      c[con[0]]=dict(port=con[1],proto=con[2])
+    self.connections=c
+    if config:config[1] = closePort(config[1])
+    self.config = config
+    if SERVICE=="ngrok":self.ngrok=ngrok(TOKEN,USE_FREE_TOKEN,connections,region,self.config)
+    self.SERVICE = SERVICE
+    
+
+  def start(self,name,btc='b',displayB=True,v=True):
+    from IPython.display import clear_output
+
+    if self.SERVICE == "localhost":
+        con=self.connections[name]
+        port=con["port"]
+        proto=con["proto"]
+        if(proto=="tcp"):
+          return self.ngrok.start(name,btc,displayB,v)
+        else:
+          if v:
+              clear_output()
+              loadingAn(name="lds")
+              textAn("Starting localhost ...", ty="twg")
+          data = dict(url="https://"+LocalhostRun(port).keep_alive())
+          if displayB:
+              displayUrl(data, btc)
+          return data
+    elif self.SERVICE == "ngrok":
+        return self.ngrok.start(name,btc,displayB,v)
+    elif self.SERVICE == "argotunnel":
+        con=self.connections[name]
+        port=con["port"]
+        proto=con["proto"]
+        if v:
+          clear_output()
+          loadingAn(name="lds")
+          textAn("Starting Argo Tunnel ...", ty="twg")
+        data = dict(url="https://"+ArgoTunnel(port, proto, closePort(self.config[1])).keep_alive())
+        if displayB:
+          displayUrl(data, btc)
+        return data
+    elif self.SERVICE == "jprq":
+        con=self.connections[name]
+        port=con["port"]
+        proto=con["proto"]
+        if v:
+          clear_output()
+          loadingAn(name="lds")
+          textAn("Starting jprq ...", ty="twg")
+        data = dict(url="https://"+jprq(port, proto).keep_alive())
+        if displayB:
+          displayUrl(data, btc)
+        return data
         
-        for con in connections:
-            c[con[0]]=dict(port=con[1],proto=con[2])
-            self.connections=c
 
-        if config:config[1] = closePort(config[1])
-            self.config = config
-
-        if SERVICE=="ngrok":self.ngrok=ngrok(TOKEN,USE_FREE_TOKEN,connections,region,self.config)
-            self.SERVICE = SERVICE
-        
-
-    def start(self,name,btc='b',displayB=True,v=True):
-        from IPython.display import clear_output
-
-        if self.SERVICE == "localhost":
-            con=self.connections[name]
-            port=con["port"]
-            proto=con["proto"]
-            
-            if (proto=="tcp"):
-                return self.ngrok.start(name,btc,displayB,v)
-            else:
-                if v:
-                    clear_output()
-                    loadingAn(name="lds")
-                    textAn("Starting tunnel localhost.run...", ty="twg")
-
-                data = dict(url="https://"+LocalhostRun(port).keep_alive())
-
-                if displayB:
-                    displayUrl(data, btc)
-
-                return data
-
-        elif self.SERVICE == "ngrok":
-            return self.ngrok.start(name,btc,displayB,v)
-
-        elif self.SERVICE == "argotunnel":
-            con=self.connections[name]
-            port=con["port"]
-            proto=con["proto"]
-
-            if v:
-                clear_output()
-
-                loadingAn(name="lds")
-                textAn("Starting tunnel argo tunnel...", ty="twg")
-                data = dict(url="https://"+ArgoTunnel(port, proto, closePort(self.config[1])).keep_alive())
-            
-            if displayB:
-                displayUrl(data, btc)
-
-            return data
-
-        elif self.SERVICE == "jprq":
-            con=self.connections[name]
-            port=con["port"]
-            proto=con["proto"]
-            
-            if v:
-                clear_output()
-
-                loadingAn(name="lds")
-                textAn("Starting tunnel jprq...", ty="twg")
-                data = dict(url="https://"+jprq(port, proto).keep_alive())
-
-            if displayB:
-                displayUrl(data, btc)
-
-            return data
-        
 
 class PortForward_wrapper(PortForward):
-    def __init__(self,SERVICE,TOKEN,USE_FREE_TOKEN,connections,region,config):
-        super(self.__class__,self).__init__(connections,region,SERVICE,TOKEN,USE_FREE_TOKEN,config)
+  def __init__(self,SERVICE,TOKEN,USE_FREE_TOKEN,connections,region,config):
+    super(self.__class__,self).__init__(connections,region,SERVICE,TOKEN,USE_FREE_TOKEN,config)
 
 
 def findPackageR(id_repo, p_name, tag_name=False, all_=False):
-    import requests
+  import requests
 
-    for rawData in requests.get(f"https://api.github.com/repos/{id_repo}/releases").json():
-        if tag_name:
-            if rawData['tag_name'] != tag_name:
-                continue
+  for rawData in requests.get(f"https://api.github.com/repos/{id_repo}/releases").json():
+    if tag_name:
+      if rawData['tag_name'] != tag_name:
+        continue
 
-        for f in rawData['assets']:
-            if p_name == f['browser_download_url'][-len(p_name):]:
-                rawData['assets'] = f 
-
-                return f['browser_download_url'] if not all_ else rawData
-
-    raise Exception("Not found or maybe the API has been changed!\n Try it again with different package name!")
+    for f in rawData['assets']:
+      if p_name == f['browser_download_url'][-len(p_name):]:
+        rawData['assets'] = f 
+        return f['browser_download_url'] if not all_ else rawData
+  raise Exception("not found or maybe api changed!\n Try again with Change packages name")
 
 def closePort(port):
-    import socket
-
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        for _ in range(100):
-            if s.connect_ex(('localhost', port)) == 0:
-                port += 1
-            else:
-                return port
-
-    raise Exception("Unable to find the close port!")
+  import socket
+  with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    for _ in range(100):
+      if s.connect_ex(('localhost', port)) == 0:
+        port += 1
+      else:
+        return port
+  raise Exception("Close port not found!")
