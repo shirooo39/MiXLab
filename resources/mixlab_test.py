@@ -165,8 +165,8 @@ class ngrok:
                 dport = self.sdict[nServer][0]
                 nServer = 'command_line'
 
-        else:
-            dport = self.dport
+            else:
+                dport = self.dport
 
         host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
         host = loads(host.read())['tunnels']
