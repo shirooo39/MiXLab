@@ -167,9 +167,8 @@ class ngrok:
 
             else:
                 dport = self.dport
-
-        host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
-        host = loads(host.read())['tunnels']
+                host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
+                host = loads(host.read())['tunnels']
 
         for h in host:
             if h['name'] == nServer:
