@@ -164,45 +164,42 @@ class ngrok:
             if self.USE_FREE_TOKEN:
                 dport = self.sdict[nServer][0]
                 nServer = 'command_line'
-            else:
-                dport = self.dport
-                host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
-                host = loads(host.read())['tunnels']
 
-            for h in host:
-                if h['name'] == nServer:
-                    host = h['public_url'][8:]
-                    data = {"url": f"https://{host}"}
+        else:
+            dport = self.dport
 
-                if displayB:
-                    displayUrl(data, btc)
+        host = urllib.request.urlopen(f"http://localhost:{dport}/api/tunnels")
+        host = loads(host.read())['tunnels']
 
-                return data
+        for h in host:
+            if h['name'] == nServer:
+                host = h['public_url'][8:]
+                data = {"url": f"https://{host}"}
 
-        except:
-            raise Exception('No tunnel has been found.')
-                except urllib.error.URLError:
-                    for run in range(10):
-                        if v:
-                            clear_output()
+            if displayB:
+                displayUrl(data, btc)
+            return data
 
-                            loadingAn(name='lds')
-                            dati = self.startWebUi(
-                                self.nameport(self.TOKEN, self.USE_FREE_TOKEN) if not self.USE_FREE_TOKEN else {},
-                                self.dport,
-                                nServerbk,
-                                self.region,
-                                btc,
-                                self.configPath,
-                                displayB,
-                                self.service,
-                                v
-                                )
-
-                        if dati == True:
-                            continue
-
-                        return dati
+        raise Exception('No tunnel has been found.')
+            except urllib.error.URLError:
+            for run in range(10):
+                if v:
+                clear_output()
+                loadingAn(name='lds')
+                dati = self.startWebUi(
+                    self.nameport(self.TOKEN, self.USE_FREE_TOKEN) if not self.USE_FREE_TOKEN else {},
+                    self.dport,
+                    nServerbk,
+                    self.region,
+                    btc,
+                    self.configPath,
+                    displayB,
+                    self.service,
+                    v
+                    )
+                if dati == True:
+                    continue
+                return dati
 
 
 def checkAvailable(path_="", userPath=False):
