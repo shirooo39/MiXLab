@@ -27,3 +27,5 @@ The purpose of this notebook is purely for educational.
 <br><br>
 I also did not write all of the contents in this notebook.<br>
 This notebook is a mixture of various different notebooks written by various different users.
+
+(Note to self: beautify a bit this readme?)
