@@ -1,3 +1,7 @@
+# Notice
+I'm putting this project on hold for indefinite amount of time as I'm busy with real life and working.  
+This project is NOT abandoned. It being put on hold and abandoned are 2 different things.
+
 # How to use
 Click <a href="https://colab.research.google.com/github/shirooo39/MiXLab/blob/master/MiXLab.ipynb" target="_blank">HERE</a> for the "Standard" version.</br>
 Click <a href="https://colab.research.google.com/github/shirooo39/MiXLab/blob/master/MiXLabLite.ipynb" target="_blank">HERE</a> for the "Lite" version. (haven't been updated for quite a long time, but should still work just fine.)
