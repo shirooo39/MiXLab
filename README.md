@@ -1,11 +1,5 @@
 # Update (as of 2022-07-07)
-So, it seems Google has flagged my Notebook.  
-I can't run some number of cells (other than the broken tunneling (Argo Tunnel, localhost, ngrok)).  
-For example, the Chrome Remote Desktop.
-
-Colab is now basically telling:  
-"Hey! You can't run that! That's not what Colab is for!"  
-"Well... if you still want/insist to run it, go ahead. BUT! we'll be flagging your account as well."
+So it seems Google now flagging some codes that utilizes Colab as a remote desktop, a torrent downloader, a seedbox, and might be something else as well. You can still run these flagged cells, but then Google will also flag your account, which your account may end up not being able to use Colab as freely as before.
 
 # How to use
 Click <a href="https://colab.research.google.com/github/shirooo39/MiXLab/blob/master/MiXLab.ipynb" target="_blank">HERE</a> for the "Standard" version.  
