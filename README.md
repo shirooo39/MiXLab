@@ -30,5 +30,6 @@ Whatever you are doing with this notebook is **ON YOUR OWN!**
 ```The purpose of this notebook is purely for educational!```
 
 I also did not write all of the codes in this notebook.  
-This notebook contains a cherry-picked codes written by amazing people and put into a single Notebook. But I also do have my own portion of codes written in the notebook.
+This notebook contains a cherry-picked codes written by amazing people and put into a single Notebook.  
+But I also do have my own portion of codes written in the notebook.
 
