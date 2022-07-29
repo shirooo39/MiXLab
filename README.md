@@ -1,8 +1,10 @@
 # Notice (as of 2022-07-07)
 So it seems Google is now flagging some codes that utilizes Colab as a free remote desktop, a free torrent downloader, a free seedbox, and all of those bad things we want to use it for. You **might** still be able run these flagged codes, but then Google will also going to flag your account, in which your account may end up not being able to use Colab as freely as before.
 
+# Coffee needed
 If you liked this Notebook, please buy me a coffee UwU
 
+<a href='https://ko-fi.com/shiro39' target='_blank'><img height='35' style='border: 0px; height: 46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com'></a>
 <a href="https://www.buymeacoffee.com/shiro39" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
 
 
